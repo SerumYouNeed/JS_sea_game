@@ -133,39 +133,45 @@ function handleBubbles() {
     if(gameFrame % 50 == 0) {
         bubblesArray.push(new Bubbel());
     }
-    for(let i = 0; i < bubblesArray.length; i++) {
-        bubblesArray[i].update();
-        bubblesArray[i].draw();
-    }
     // znikanie b.
-    for(let j = 0; j < bubblesArray.length; j++){
+    for(let j = 0; j < bubblesArray.length; j++) {
+        bubblesArray[j].update();
+        bubblesArray[j].draw();
         if(bubblesArray[j].y < 0 - bubblesArray[j].radius * 2) {
             bubblesArray.splice(j, 1);
-        }
-        // wykonaj tylko jeśli ta bańka istnieje
-        if(bubblesArray[j]) {
+            j--; // bańka nie miga po zniknięciu ostatniej
+            // wykonaj tylko jeśli ta bańka istnieje
             // kolizja - porównuje czy suma promieni bubla i playera jest większa od dist
-            if(bubblesArray[j].distance < bubblesArray[j].radius + player.radius) {
-                if(!bubblesArray[j].counted){
-                    if(bubblesArray[j].sound == 'sound1') {
-                        bubblePop1.play();
-                    } else {
-                        bubblePop2.play();
-                    }
-                    // jeśli wystąpi kolizja update score
-                    score++;
-                    bubblesArray[j].counted = true;
-                    bubblesArray.splice(j, 1);
+        } else if(bubblesArray[j].distance < bubblesArray[j].radius + player.radius) {
+            if(!bubblesArray[j].counted){
+                if(bubblesArray[j].sound == 'sound1') {
+                    // bubblePop1.play();
+                } else {
+                    // bubblePop2.play();
                 }
+                // jeśli wystąpi kolizja update score
+                score++;
+                bubblesArray[j].counted = true;
+                bubblesArray.splice(j, 1);
+                j--;
             }
         }
     }
+}
+
+// tło
+const background = new Image();
+background.src = 'background1.jpg';
+
+function handleBackground() {
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 }
 
 // pętla animacji
 function animate() {
     // czyścimy planszę przed każdą animacją
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    handleBackground();
     handleBubbles();
     player.update();
     player.draw();
@@ -175,3 +181,8 @@ function animate() {
     requestAnimationFrame(animate);
 }
 animate();
+
+// zmiana wielkości okna nie powoduje buga na myszy
+window.addEventListener('resize', function() {
+    canvasPosition = canvas.getBoundingClientRect();
+})
