@@ -9,6 +9,7 @@ canvas.height = 500;
 let score = 0;
 let gameFrame = 0;
 ctx.font = '50px Georgia';
+let gameSpeed = 1;
 
 // aktywność myszki
 // zwraca wielkość canvas i pozycję w relacji do viewport a nie do początku strony
@@ -93,6 +94,8 @@ const player = new Player();
 
 // bąbelki
 const bubblesArray =[];
+const bubbleImage = new Image();
+bubbleImage.src = 'bubble_pop_one/bubble_pop_frame_01.png';
 
 class Bubbel {
     constructor() {
@@ -114,12 +117,16 @@ class Bubbel {
         this. distance = Math.sqrt(dx*dx + dy*dy);
     }
     draw() {
-        ctx.fillStyle = 'blue';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-        ctx.stroke();
+        // to są bańki do testów
+        // ctx.fillStyle = 'blue';
+        // ctx.beginPath();
+        // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        // ctx.fill();
+        // ctx.closePath();
+        // ctx.stroke();
+
+        // obrazek, przesunięcie x, przesyniecie y, rozmiar x, rozmiar y
+        ctx.drawImage(bubbleImage, this.x -65, this.y -65, this.radius * 2.6, this.radius * 2.6);
     }
 }
 
@@ -163,8 +170,23 @@ function handleBubbles() {
 const background = new Image();
 background.src = 'background1.jpg';
 
+// obiekt tła do pętli
+const BG = {
+    x1: 0,
+    x2: canvas.width,
+    y: 0,
+    width: canvas.width,
+    height: canvas.height
+}
+
+// pętla przesuwająca tło
 function handleBackground() {
-    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+    BG.x1 -= gameSpeed;
+    if(BG.x1 < -BG.width) BG.x1 = BG.width;
+    BG.x2 -= gameSpeed;
+    if(BG.x2 < -BG.width) BG.x2 = BG.width;
+    ctx.drawImage(background, BG.x1, BG.y, BG.width, BG.height);
+    ctx.drawImage(background, BG.x2, BG.y, BG.width, BG.height);
 }
 
 // pętla animacji
