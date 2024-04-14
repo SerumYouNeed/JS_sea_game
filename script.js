@@ -8,8 +8,9 @@ canvas.height = 500;
 
 let score = 0;
 let gameFrame = 0;
-ctx.font = '50px Georgia';
+ctx.font = '40px Georgia';
 let gameSpeed = 1;
+let gameOver = false;
 
 // aktywność myszki
 // zwraca wielkość canvas i pozycję w relacji do viewport a nie do początku strony
@@ -71,11 +72,12 @@ class Player {
             ctx.lineTo(mouse.x, mouse.y);
             ctx.stroke();
         }
-        ctx.fillStyle = 'red';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI *2);
-        ctx.fill();
-        ctx.closePath();
+        // czerwone kółko testowe
+        // ctx.fillStyle = 'red';
+        // ctx.beginPath();
+        // ctx.arc(this.x, this.y, this.radius, 0, Math.PI *2);
+        // ctx.fill();
+        // ctx.closePath();
 
         ctx.save();
         ctx.translate(this.x, this.y);
@@ -166,6 +168,78 @@ function handleBubbles() {
     }
 }
 
+// wrogowie
+const enemyImage = new Image();
+enemyImage.src = '__orange_cartoon_fish_01_swim.png';
+
+class Enemy {
+    constructor() {
+        this.x = canvas.width + 200;
+        this.y = Math.random() * (canvas.height - 150) + 90;
+        this.radius = 60;
+        this.speed = Math.random() * 2 + 2;
+        this.frame = 0;
+        this.frameX = 0;
+        this.frameY = 0;
+        this.spriteWidth = 418;
+        this.spriteHeight = 397;
+    }
+
+    draw() {
+        // czerwone kółko testowe
+        // ctx.fillStyle = 'red';
+        // ctx.beginPath();
+        // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        // ctx.fill();
+        ctx.drawImage(enemyImage, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight, this.x - 60, this.y - 75, this.spriteWidth/3, this.spriteHeight/3);
+    }
+
+    update() {
+        this.x -= this.speed;
+        if(this.x < 0 - this.radius * 2) {
+            this.x = canvas.width + 200;
+            this.y = Math.random() * (canvas.height - 150) + 90;
+            this.speed = Math.random() * 2 + 2;
+        }
+        // co 5 framów
+        //ruchy ryby wroga
+        if(gameFrame % 5 == 0) {
+            this.frame++;
+            if(this.frame >= 12) this.frame = 0;
+            if(this.frame == 3 || this.frame == 7 || this.frame == 11) {
+                this.frameX = 0;
+            } else {
+                this.frameX++;
+            }
+            if(this.frame < 3) this.frameY = 0;
+            else if(this.frame < 7) this.frameY = 1;
+            else if(this.frame < 11) this.frameY = 2;
+            else this.frameY = 0;
+        }
+        // kolizja ryb
+        // dystans liczę z pitagorasa
+        const dx = this.x - player.x;
+        const dy = this.y - player.y;
+        const distance = Math.sqrt(dx*dx + dy*dy);
+        if(distance < this.radius + player.radius) {
+            handleGameOver();
+        }
+    }
+}
+
+const enemy1 = new Enemy();
+function handleEney(){
+    enemy1.draw();
+    enemy1.update();
+}
+
+function handleGameOver() {
+    ctx.fillStyle = 'white';
+    ctx.fillText('GAME OVER...', 250, 150);
+    ctx.fillText(`Your score: ${score}`, 250, 250);
+    gameOver = true;
+}
+
 // tło
 const background = new Image();
 background.src = 'background1.jpg';
@@ -177,6 +251,11 @@ const BG = {
     y: 0,
     width: canvas.width,
     height: canvas.height
+}
+
+// statyczne tło
+function backpic() {
+    ctx.drawImage(background,0, 0, canvas.width, canvas.height);
 }
 
 // pętla przesuwająca tło
@@ -193,14 +272,16 @@ function handleBackground() {
 function animate() {
     // czyścimy planszę przed każdą animacją
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    handleBackground();
+    //handleBackground();
+    backpic();
     handleBubbles();
     player.update();
     player.draw();
+    handleEney();
     ctx.fillStyle = 'black';
     ctx.fillText('score: ' + score, 10, 50);
     gameFrame++;
-    requestAnimationFrame(animate);
+    if(!gameOver) requestAnimationFrame(animate);
 }
 animate();
 
